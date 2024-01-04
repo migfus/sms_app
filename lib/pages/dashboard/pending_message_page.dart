@@ -22,6 +22,7 @@ class PendingMessagePageState extends State<PendingMessagePage> {
   late Future<List<dynamic>> _fetchData = getAPI();
   late Timer timer;
   double turns = 0.0;
+  int seconds = 0;
 
 
   // SECTION API
@@ -130,8 +131,9 @@ class PendingMessagePageState extends State<PendingMessagePage> {
   void initState() {
     super.initState();
 
-    Timer.periodic(const Duration(minutes: 1), (timer) { 
-      if(timer.tick > 1) {
+    Timer.periodic(const Duration(seconds: 1), (timer) { 
+      seconds = timer.tick;
+      if(seconds % 60 == 0) {
         printColored(text: 'Timer executed minute:${timer.tick}');
         setState(() {
           _fetchData = getAPI();
@@ -139,6 +141,7 @@ class PendingMessagePageState extends State<PendingMessagePage> {
       }
     });
   }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -48,7 +48,7 @@ class _DashboardPageState extends State<DashboardPage> {
       home: Scaffold(
         body: _pages[_selectedIndex],
         bottomNavigationBar: BottomNavigationBar(
-          selectedItemColor: Colors.teal,
+          // selectedItemColor: Colors.teal,
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.library_add),
