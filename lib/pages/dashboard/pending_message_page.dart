@@ -21,6 +21,7 @@ class PendingMessagePageState extends State<PendingMessagePage> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   late Future<List<dynamic>> _fetchData = getAPI();
   late Timer timer;
+  late Timer _timer;
   double turns = 0.0;
   int seconds = 0;
 
@@ -131,7 +132,7 @@ class PendingMessagePageState extends State<PendingMessagePage> {
   void initState() {
     super.initState();
 
-    Timer.periodic(const Duration(seconds: 1), (timer) { 
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) { 
       seconds = timer.tick;
       if(seconds % 60 == 0) {
         printColored(text: 'Timer executed minute:${timer.tick}');
@@ -140,8 +141,16 @@ class PendingMessagePageState extends State<PendingMessagePage> {
         });
       }
     });
+
+    
   }
-  
+
+  @override
+  void dispose() {
+    super.dispose();
+    _timer.cancel();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -158,19 +167,16 @@ class PendingMessagePageState extends State<PendingMessagePage> {
         future: _fetchData,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
+            if(snapshot.data!.length == 0) {
+              return T
+            }
+
             return ListView.builder(
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
                 Map<String, dynamic> message = snapshot.data![index];
 
                 if(index == 0) {
-                  // printColored('ListView will display index[$index]');
-                  // postAPI(
-                  //   id: message['id'].toString(), 
-                  //   mobile: message['user_register']['mobile'], 
-                  //   content: message['content']
-                  // );
-
                   return ListTile(
                     title: Text('0${message['user_register']['mobile']}'),
                     subtitle: Text(message['content']),
