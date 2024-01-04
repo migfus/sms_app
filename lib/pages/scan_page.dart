@@ -1,12 +1,15 @@
 import 'dart:developer';
 import 'dart:io';
-
+import 'dart:math';
+import 'dart:convert' as convert;
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sms_app/pages/dashboard_page.dart';
 import 'package:vibration/vibration.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ScanPage extends StatefulWidget {
   const ScanPage({Key? key}) : super(key: key);
@@ -16,9 +19,113 @@ class ScanPage extends StatefulWidget {
 }
 
 class _ScanPage extends State<ScanPage> {
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  bool confirmSent = false;
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  Future<String> _addDevice() async{
+    final SharedPreferences prefs = await _prefs;
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    
+    var res = await http.post(
+      Uri.parse('${prefs.getString('url') ?? 'https://id.migfus.net/'}/api/device'),
+      headers: { 'Accept': 'application/json' },
+      body: {
+        'id': generateID(),
+        'name': androidInfo.brand,
+        'platform': 'Android'
+      }
+    );
+
+    if(res.statusCode == 200) {
+      printColored(text: 'Device has been added', color: 'success');
+      var jsonList = convert.jsonDecode(res.body);
+      return jsonList['data'];
+    }
+
+    return '';
+  }
+
+  String generateID({int len = 5}) {
+    var r = Random();
+    return String.fromCharCodes(List.generate(len, (index) => r.nextInt(33) + 89));
+  }
+
+  void printColored({required String text, String color = 'white'}) {
+    switch(color) {
+      case 'danger':
+        print('\x1B[31m$text\x1B[0m');
+        break;
+      case 'warning':
+        print('\x1B[33m$text\x1B[0m');
+        break;
+      case 'success':
+        print('\x1B[32m$text\x1b[0m');
+      default: // info [white]
+        print('\x1B[37m$text\x1B[0m');
+    }
+    
+  }
+
+
+  void _onQRViewCreated(QRViewController controller) async {
+    if(!confirmSent) {
+
+      this.controller = controller;
+
+      controller.scannedDataStream.listen((scanData) async {
+        var jsonList = convert.jsonDecode(scanData.code!);
+
+        controller!.pauseCamera();
+
+        await _willVibrate();
+        await _setDeviceToken(jsonList['link']);
+
+        setState((){
+          result = scanData;
+        });
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const DashboardPage())
+        );
+        confirmSent = true;
+      });
+    }
+    
+  }
+
+  Future<void> _willVibrate() async {
+    if (await Vibration.hasVibrator() != null) {
+      await Vibration.vibrate(duration: 1000);
+    }
+  }
+
+  Future<void> _setDeviceToken(String link) async {
+    String devicID = await _addDevice();
+    final prefs = await SharedPreferences.getInstance();
+    
+    prefs.setString('deviceToken', 'qr_$devicID');
+    prefs.setString('url', link);
+  }
+
+  void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
+    printColored(text: '${DateTime.now().toIso8601String()}_onPermissionSet $p');
+    if (!p) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('no Permission')),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
+  }
 
   @override
   void reassemble() {
@@ -98,55 +205,5 @@ class _ScanPage extends State<ScanPage> {
           cutOutSize: scanArea),
       onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
     );
-  }
-
-  void _onQRViewCreated(QRViewController controller) {
-    setState(() {
-      this.controller = controller;
-    });
-    controller.scannedDataStream.listen((scanData) {
-      _willVibrate();
-      _setDeviceToken(scanData);
-
-      if(scanData.code!.contains('qr_')) {
-        setState((){
-          result = scanData;
-        });
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const DashboardPage())
-        );
-      }
-
-      // dispose();
-    });
-  }
-
-  void _willVibrate() async {
-    if (await Vibration.hasVibrator() != null) {
-      await Vibration.vibrate(duration: 1000);
-    }
-  }
-
-  void _setDeviceToken(Barcode scanData) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('deviceToken', "${scanData.code}");
-    log("QR Code Data: ${scanData.code}");
-  }
-
-  void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
-    log('${DateTime.now().toIso8601String()}_onPermissionSet $p');
-    if (!p) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('no Permission')),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    controller?.dispose();
-    super.dispose();
   }
 }

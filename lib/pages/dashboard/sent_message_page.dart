@@ -21,7 +21,7 @@ class _SentMessagePageState extends State<SentMessagePage> {
     final SharedPreferences prefs = await _prefs;
 
     var response = await http.get(
-      Uri.parse('http://192.168.137.1:8000/api/text-message?type=sent&id=${prefs.getString('deviceToken')!.replaceAll('qr_', '')}'),
+      Uri.parse('${prefs.getString('url')}/api/text-message?type=sent&id=${prefs.getString('deviceToken')!.replaceAll('qr_', '')}'),
       headers: { 'Accept': 'application/json' },
     );
 
@@ -30,6 +30,10 @@ class _SentMessagePageState extends State<SentMessagePage> {
       return jsonList['data'];
     }
     return [];
+  }
+
+  String _fullName({ required String last, required String first}) {
+    return '$last, $first';
   }
 
   @override
@@ -55,9 +59,11 @@ class _SentMessagePageState extends State<SentMessagePage> {
                 Map<String, dynamic> post = snapshot.data![index];
 
                 return ListTile(
-                  title: Text('0${post['user_register']['mobile']}'),
+                  title: Text('0${post['user_register']['mobile']} - ${post['user_register']['last_name']}, ${post['user_register']['first_name']} ${post['user_register']['mid_name'] ?? ''} ${post['user_register']['ext_name'] ?? ''}'),
                   subtitle: Text(post['content']),
-                  trailing: Text(timeago.format(DateTime.parse(post['read_at']), locale: 'en_short')),
+                  trailing: Text(
+                    timeago.format(DateTime.parse(post['read_at']).add(const Duration(hours: 8)), locale: 'en_short')
+                  ),
                 );
               },
             );

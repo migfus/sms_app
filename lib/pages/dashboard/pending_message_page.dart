@@ -33,7 +33,7 @@ class PendingMessagePageState extends State<PendingMessagePage> {
     printColored(text: 'getAPI will fetch');
 
     var response = await http.get(
-      Uri.parse('http://192.168.137.1:8000/api/text-message?type=pending&id=${prefs.getString('deviceToken')!.replaceAll('qr_', '')}'),
+      Uri.parse('${prefs.getString('url')}/api/text-message?type=pending&id=${prefs.getString('deviceToken')!.replaceAll('qr_', '')}'),
       headers: { 'Accept': 'application/json' },
     );
 
@@ -64,7 +64,7 @@ class PendingMessagePageState extends State<PendingMessagePage> {
         final SharedPreferences prefs = await _prefs;
 
         var res = await http.put(
-          Uri.parse('http://192.168.137.1:8000/api/text-message/$id'), 
+          Uri.parse('${prefs.getString('url')}/api/text-message/$id'), 
           headers: { 'Accept': 'application/json' },
           body: {'device_id': prefs.getString('deviceToken')!.replaceAll('qr_', '') }
         );
@@ -168,7 +168,9 @@ class PendingMessagePageState extends State<PendingMessagePage> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             if(snapshot.data!.length == 0) {
-              return T
+              return const Center(
+                child: Text('Waiting for any sms.')
+              );
             }
 
             return ListView.builder(
@@ -188,7 +190,7 @@ class PendingMessagePageState extends State<PendingMessagePage> {
                 }
                 else {
                   return ListTile(
-                    title: Text('0${message['user_register']['mobile']}'),
+                    title: Text('0${message['user_register']['mobile']} - ${message['user_register']['last_name']}, ${message['user_register']['first_name']} ${message['user_register']['mid_name'] ?? ''} ${message['user_register']['ext_name'] ?? ''}'),
                     subtitle: Text(message['content']),
                     trailing: Text(timeago.format(DateTime.parse(message['created_at']), locale: 'en_short'))
                   );

@@ -13,7 +13,7 @@
     <!-- !SECTION ADDED -->
 
     <application
-        android:label="sms_app"
+        android:label="OHRM SMS"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

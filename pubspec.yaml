@@ -21,6 +21,8 @@ dependencies:
   device_info_plus: ^9.1.1
   timeago: ^3.6.0
   flutter_local_notifications: ^16.3.0
+  flutter_launcher_icons: ^0.13.1
+  
 
 dev_dependencies:
   flutter_test:
@@ -31,3 +33,11 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+flutter_launcher_icons: 
+  image_path_android: "assets/icon.png"
+  image_path_ios: "assets/icon.png"
+  image_path: "assets/icon.png"
+  android: true
+  ios: true
+
