@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 import 'dart:math';
 import 'dart:convert' as convert;
@@ -9,7 +8,7 @@ import 'package:sms_app/pages/dashboard_page.dart';
 import 'package:vibration/vibration.dart';
 import 'package:http/http.dart' as http;
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../utils.dart';
 
 class ScanPage extends StatefulWidget {
   const ScanPage({Key? key}) : super(key: key);
@@ -29,9 +28,11 @@ class _ScanPage extends State<ScanPage> {
   Future<String> _addDevice() async{
     final SharedPreferences prefs = await _prefs;
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    coloredPrint(text: 'postAPI will process');
+    coloredPrint(text: 'testing generateID: ${generateID()}');
     
     var res = await http.post(
-      Uri.parse('${prefs.getString('url') ?? 'https://id.migfus.net/'}/api/device'),
+      Uri.parse('${prefs.getString('url') ?? 'http://192.168.137.1:8000/'}/api/device'),
       headers: { 'Accept': 'application/json' },
       body: {
         'id': generateID(),
@@ -41,7 +42,7 @@ class _ScanPage extends State<ScanPage> {
     );
 
     if(res.statusCode == 200) {
-      printColored(text: 'Device has been added', color: 'success');
+      coloredPrint(text: 'Device has been added', color: 'success');
       var jsonList = convert.jsonDecode(res.body);
       return jsonList['data'];
     }
@@ -54,21 +55,7 @@ class _ScanPage extends State<ScanPage> {
     return String.fromCharCodes(List.generate(len, (index) => r.nextInt(33) + 89));
   }
 
-  void printColored({required String text, String color = 'white'}) {
-    switch(color) {
-      case 'danger':
-        print('\x1B[31m$text\x1B[0m');
-        break;
-      case 'warning':
-        print('\x1B[33m$text\x1B[0m');
-        break;
-      case 'success':
-        print('\x1B[32m$text\x1b[0m');
-      default: // info [white]
-        print('\x1B[37m$text\x1B[0m');
-    }
-    
-  }
+  
 
 
   void _onQRViewCreated(QRViewController controller) async {
@@ -113,7 +100,7 @@ class _ScanPage extends State<ScanPage> {
   }
 
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
-    printColored(text: '${DateTime.now().toIso8601String()}_onPermissionSet $p');
+    coloredPrint(text: '${DateTime.now().toIso8601String()}_onPermissionSet $p');
     if (!p) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('no Permission')),

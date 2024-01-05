@@ -3,12 +3,11 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:background_sms/background_sms.dart';
-import 'package:permission_handler/permission_handler.dart';
+
 
 import 'package:sms_app/components/app_bar_search_component.dart';
+import 'package:sms_app/utils.dart';
 import 'package:timeago/timeago.dart' as timeago;
-
 
 class PendingMessagePage extends StatefulWidget {
   const PendingMessagePage({super.key});
@@ -30,7 +29,7 @@ class PendingMessagePageState extends State<PendingMessagePage> {
   // NOTE GETAPI
   Future<List<dynamic>> getAPI() async {
     final SharedPreferences prefs = await _prefs;
-    printColored(text: 'getAPI will fetch');
+    coloredPrint(text: 'getAPI will fetch');
 
     var response = await http.get(
       Uri.parse('${prefs.getString('url')}/api/text-message?type=pending&id=${prefs.getString('deviceToken')!.replaceAll('qr_', '')}'),
@@ -40,7 +39,7 @@ class PendingMessagePageState extends State<PendingMessagePage> {
     if(response.statusCode == 200){
       var jsonList = convert.jsonDecode(response.body);
       if(jsonList['data'].length > 0) {
-        printColored(text: 'getAPI success returned 200 [data:${jsonList['data'].length}]', color: 'success');
+        coloredPrint(text: 'getAPI success returned 200 [data:${jsonList['data'].length}]', color: 'success');
 
         postAPI(
           id: jsonList['data'][0]['id'].toString(), 
@@ -55,78 +54,41 @@ class PendingMessagePageState extends State<PendingMessagePage> {
 
   // NOTE POSTAPI
   void postAPI({ required String id, required String mobile, required String content}) async {
-    printColored(text: 'postAPI will send SMS');
+    coloredPrint(text: 'postAPI will send SMS');
+    final SharedPreferences prefs = await _prefs;
 
-    if(await _isPermissionGranted()) {
-      if(await _sendMessage('0$mobile', content, simSlot: 1)) {
+    // NOTE ERROR cannot send sms
+    if(await uSendMessage('0$mobile', content) == false) {
+      coloredPrint(text: 'SMS send error will not postAPI()', color: 'error');
+    }
+    // NOTE message sent
+    else {
+      coloredPrint(text: 'SMS Success! Will update postAPI to server');
 
-        printColored(text: 'SMS Success will update postAPI to server');
-        final SharedPreferences prefs = await _prefs;
+      var res = await http.put(
+        Uri.parse('${prefs.getString('url')}/api/text-message/$id'), 
+        headers: { 'Accept': 'application/json' },
+        body: {'device_id': prefs.getString('deviceToken')!.replaceAll('qr_', '') }
+      );
 
-        var res = await http.put(
-          Uri.parse('${prefs.getString('url')}/api/text-message/$id'), 
-          headers: { 'Accept': 'application/json' },
-          body: {'device_id': prefs.getString('deviceToken')!.replaceAll('qr_', '') }
-        );
+      if(res.statusCode == 200) {
+        coloredPrint(text: 'postAPI success returned 200 id:$id', color: 'success');
 
-        if(res.statusCode == 200) {
-          printColored(text: 'postAPI success returned 200 id:$id', color: 'success');
+        coloredPrint(text: 'Will wait after 5 seconds');
 
-          printColored(text: 'Will wait after 5 seconds');
-
-          Timer(const Duration(seconds: 5), () {
-            printColored(text: "Waiting done");
+        Timer(const Duration(seconds: 5), () {
+          if(mounted) {
+            coloredPrint(text: "Waiting done");
             setState(() {
-              printColored(text: 'getAPI is called', color: 'success');
+              coloredPrint(text: 'getAPI is called', color: 'success');
               _fetchData = getAPI();
             });
-          });
-        }
-
-      }
-      else {
-        printColored(text: 'SMS send error will not postAPI()', color: 'error');
+          }
+        });
       }
     }
-    else {
-      await _getPermission();
-    }
   }
 
-  _getPermission() async => await [ Permission.sms,].request();
-
-  Future<bool> _isPermissionGranted() async => await Permission.sms.status.isGranted;
-
-  Future<bool> _sendMessage(String phoneNumber, String message, {int? simSlot}) async {
-      var result = await BackgroundSms.sendMessage(
-        phoneNumber: 
-        phoneNumber, 
-        message: message, 
-        simSlot: simSlot
-      );
-      if (result == SmsStatus.sent) {
-        printColored(text: "SMS Sent");
-        return true;
-      } 
-      return false;
-  }
-
-  // SECTION FUNC
-  void printColored({required String text, String color = 'white'}) {
-    switch(color) {
-      case 'danger':
-        print('\x1B[31m$text\x1B[0m');
-        break;
-      case 'warning':
-        print('\x1B[33m$text\x1B[0m');
-        break;
-      case 'success':
-        print('\x1B[32m$text\x1b[0m');
-      default: // info [white]
-        print('\x1B[37m$text\x1B[0m');
-    }
-    
-  }
 
   @override
   void initState() {
@@ -135,7 +97,7 @@ class PendingMessagePageState extends State<PendingMessagePage> {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) { 
       seconds = timer.tick;
       if(seconds % 60 == 0) {
-        printColored(text: 'Timer executed minute:${timer.tick}');
+        coloredPrint(text: 'Timer executed minute:${timer.tick}');
         setState(() {
           _fetchData = getAPI();
         });
@@ -167,7 +129,7 @@ class PendingMessagePageState extends State<PendingMessagePage> {
         future: _fetchData,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            if(snapshot.data!.length == 0) {
+            if(snapshot.data!.isEmpty) {
               return const Center(
                 child: Text('Waiting for any sms.')
               );
