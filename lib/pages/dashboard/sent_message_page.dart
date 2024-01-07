@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:sms_app/types/TextMessage.dart';
+import 'package:sms_app/utils.dart';
 import 'dart:convert' as convert;
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -15,25 +17,25 @@ class SentMessagePage extends StatefulWidget {
 
 class _SentMessagePageState extends State<SentMessagePage> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  late Future<List<dynamic>> _fetchData = getAPI();
+  late Future<List<TextMessage>> _fetchData = getAPI();
 
-  Future<List<dynamic>> getAPI() async {
+  Future<List<TextMessage>> getAPI() async {
     final SharedPreferences prefs = await _prefs;
 
-    var response = await http.get(
+    var res = await http.get(
       Uri.parse('${prefs.getString('url')}/api/text-message?type=sent&id=${prefs.getString('deviceToken')!.replaceAll('qr_', '')}'),
       headers: { 'Accept': 'application/json' },
     );
 
-    if(response.statusCode == 200){
-      var jsonList = convert.jsonDecode(response.body);
-      return jsonList['data'];
+    if(res.statusCode == 200){
+      coloredPrint(text: 'sent status 200');
+      final rawJsonData = convert.jsonDecode(res.body);
+      final List<dynamic> jsonData = rawJsonData['data'];
+      final List<TextMessage> messages = jsonData.map((data) => TextMessage.fromJson(data)).toList();
+      coloredPrint(text: 'sent status past json to messages');
+      return messages;
     }
     return [];
-  }
-
-  String _fullName({ required String last, required String first}) {
-    return '$last, $first';
   }
 
   @override
@@ -56,13 +58,13 @@ class _SentMessagePageState extends State<SentMessagePage> {
             return ListView.builder(
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
-                Map<String, dynamic> post = snapshot.data![index];
+                TextMessage message = snapshot.data![index];
 
                 return ListTile(
-                  title: Text('0${post['user_register']['mobile']} - ${post['user_register']['last_name']}, ${post['user_register']['first_name']} ${post['user_register']['mid_name'] ?? ''} ${post['user_register']['ext_name'] ?? ''}'),
-                  subtitle: Text(post['content']),
+                  title: Text('0${message.userRegister.mobile} - ${convertFullName(last: message.userRegister.lastName, first: message.userRegister.firstName, mid: message.userRegister.midName, ext: message.userRegister.extName)}'),
+                  subtitle: Text(message.content),
                   trailing: Text(
-                    timeago.format(DateTime.parse(post['read_at']).add(const Duration(hours: 8)), locale: 'en_short')
+                    timeago.format(DateTime.parse(message.readAt ?? '').add(const Duration(hours: 8)), locale: 'en_short')
                   ),
                 );
               },

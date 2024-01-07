@@ -12,7 +12,7 @@ class IntroPage extends StatefulWidget {
 
 class _IntroPageState extends State<IntroPage> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  String _url = 'http://192.168.137.1:8000';
+  String _url = 'https://id.migfus.net';
 
   void _proceed() async {
     final SharedPreferences prefs = await _prefs;
@@ -23,7 +23,7 @@ class _IntroPageState extends State<IntroPage> {
 
   void _initInput() async {
     final SharedPreferences prefs = await _prefs;
-    _url = prefs.getString('url') ?? 'http://192.168.137.1:8000';
+    _url = prefs.getString('url') ?? 'https://id.migfus.net';
   }
 
   @override

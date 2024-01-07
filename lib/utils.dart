@@ -64,3 +64,16 @@ Future<bool> uSendMessage(String phoneNumber, String message) async {
   
   return false;
 }
+
+
+// NOTE CONVERTION
+String convertFullName({required String last, required String first, String? mid, String? ext}) {
+  if(mid != null && ext != null) {
+    return '$last, $first $mid. $ext.';
+  }
+  else if(mid != null) {
+    return '$last, $first $mid.';
+  }
+
+  return '$last, $first';
+}

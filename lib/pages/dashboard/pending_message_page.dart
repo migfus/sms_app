@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 
 import 'package:sms_app/components/app_bar_search_component.dart';
+import 'package:sms_app/types/TextMessage.dart';
 import 'package:sms_app/utils.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -31,29 +32,37 @@ class PendingMessagePageState extends State<PendingMessagePage> {
     final SharedPreferences prefs = await _prefs;
     coloredPrint(text: 'getAPI will fetch');
 
-    var response = await http.get(
+    var res = await http.get(
       Uri.parse('${prefs.getString('url')}/api/text-message?type=pending&id=${prefs.getString('deviceToken')!.replaceAll('qr_', '')}'),
       headers: { 'Accept': 'application/json' },
     );
 
-    if(response.statusCode == 200){
-      var jsonList = convert.jsonDecode(response.body);
-      if(jsonList['data'].length > 0) {
-        coloredPrint(text: 'getAPI success returned 200 [data:${jsonList['data'].length}]', color: 'success');
+    if(res.statusCode == 200){
+      final rawJsonData = convert.jsonDecode(res.body);
+      final List<dynamic> jsonData = rawJsonData['data'];
+      coloredPrint(text: '${jsonData.length}');
+      final List<TextMessage> textMessages = jsonData.map((data) => TextMessage.fromJson(data)).toList();
+
+      coloredPrint(text: 'getAPI success returned 200 [data:${textMessages.length}]', color: 'success');
+
+
+      if(textMessages.isNotEmpty) {
+        coloredPrint(text: 'getAPI success returned 200 [data:${textMessages.length}]', color: 'success');
 
         postAPI(
-          id: jsonList['data'][0]['id'].toString(), 
-          mobile: jsonList['data'][0]['user_register']['mobile'], 
-          content: jsonList['data'][0]['content']
+          id: textMessages[0].id, 
+          mobile: textMessages[0].userRegister.mobile,
+          content: textMessages[0].content
         );
-        return jsonList['data'];
+        return textMessages;
+
       }
     }
     return [];
   }
 
   // NOTE POSTAPI
-  void postAPI({ required String id, required String mobile, required String content}) async {
+  void postAPI({ required int id, required int mobile, required String content}) async {
     coloredPrint(text: 'postAPI will send SMS');
     final SharedPreferences prefs = await _prefs;
 
@@ -138,12 +147,12 @@ class PendingMessagePageState extends State<PendingMessagePage> {
             return ListView.builder(
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
-                Map<String, dynamic> message = snapshot.data![index];
+                TextMessage message = snapshot.data![index];
 
                 if(index == 0) {
                   return ListTile(
-                    title: Text('0${message['user_register']['mobile']}'),
-                    subtitle: Text(message['content']),
+                    title: Text('0${message.userRegister.mobile}'),
+                    subtitle: Text(message.content),
                     trailing: const SizedBox(
                       width: 10, height: 10,
                       child: CircularProgressIndicator()
@@ -152,13 +161,12 @@ class PendingMessagePageState extends State<PendingMessagePage> {
                 }
                 else {
                   return ListTile(
-                    title: Text('0${message['user_register']['mobile']} - ${message['user_register']['last_name']}, ${message['user_register']['first_name']} ${message['user_register']['mid_name'] ?? ''} ${message['user_register']['ext_name'] ?? ''}'),
-                    subtitle: Text(message['content']),
-                    trailing: Text(timeago.format(DateTime.parse(message['created_at']), locale: 'en_short'))
+                    title: Text('0${message.userRegister.mobile} - ${convertFullName(last: message.userRegister.lastName, first: message.userRegister.firstName, mid: message.userRegister.midName, ext: message.userRegister.extName)}'),
+                    subtitle: Text(message.content),
+                    trailing: Text(timeago.format(DateTime.parse(message.createdAt), locale: 'en_short'))
                   );
                 }
 
-                
               },
             );
           } else if (snapshot.hasError) {

@@ -32,7 +32,7 @@ class _ScanPage extends State<ScanPage> {
     coloredPrint(text: 'testing generateID: ${generateID()}');
     
     var res = await http.post(
-      Uri.parse('${prefs.getString('url') ?? 'http://192.168.137.1:8000/'}/api/device'),
+      Uri.parse('${prefs.getString('url') ?? 'https://id.migfus.net'}/api/device'),
       headers: { 'Accept': 'application/json' },
       body: {
         'id': generateID(),
