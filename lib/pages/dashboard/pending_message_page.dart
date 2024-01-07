@@ -5,9 +5,9 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
-import 'package:sms_app/components/app_bar_search_component.dart';
-import 'package:sms_app/types/TextMessage.dart';
-import 'package:sms_app/utils.dart';
+import 'package:ohrm_sms/components/app_bar_search_component.dart';
+import 'package:ohrm_sms/types/TextMessage.dart';
+import 'package:ohrm_sms/utils.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class PendingMessagePage extends StatefulWidget {
@@ -33,7 +33,7 @@ class PendingMessagePageState extends State<PendingMessagePage> {
     coloredPrint(text: 'getAPI will fetch');
 
     var res = await http.get(
-      Uri.parse('${prefs.getString('url')}/api/text-message?type=pending&id=${prefs.getString('deviceToken')!.replaceAll('qr_', '')}'),
+      Uri.parse('${prefs.getString('url')}/api/text-message?type=pending&id=${prefs.getString('deviceToken')}'),
       headers: { 'Accept': 'application/json' },
     );
 
@@ -77,7 +77,7 @@ class PendingMessagePageState extends State<PendingMessagePage> {
       var res = await http.put(
         Uri.parse('${prefs.getString('url')}/api/text-message/$id'), 
         headers: { 'Accept': 'application/json' },
-        body: {'device_id': prefs.getString('deviceToken')!.replaceAll('qr_', '') }
+        body: {'device_id': prefs.getString('deviceToken') }
       );
 
       if(res.statusCode == 200) {

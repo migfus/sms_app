@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:sms_app/pages/dashboard/settings/developer_page.dart';
-import 'package:sms_app/pages/intro_page.dart';
+import 'package:ohrm_sms/pages/dashboard/settings/developer_page.dart';
+import 'package:ohrm_sms/pages/intro_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -19,7 +19,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final SharedPreferences prefs = await _prefs;
 
     var res = await http.delete(
-      Uri.parse('${prefs.getString('url')}/api/device/${prefs.getString('deviceToken')!.replaceAll('qr_', '')}'),
+      Uri.parse('${prefs.getString('url')}/api/device/${prefs.getString('deviceToken')}'),
       headers: { 'Accept': 'application/json' },
     );
 

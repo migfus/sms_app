@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:background_sms/background_sms.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:math';
+import 'package:vibration/vibration.dart';
 
 
 void coloredPrint({required String text, String color = 'white'}) {
@@ -76,4 +78,15 @@ String convertFullName({required String last, required String first, String? mid
   }
 
   return '$last, $first';
+}
+
+String generateID({int len = 5}) {
+  var r = Random();
+  return String.fromCharCodes(List.generate(len, (index) => r.nextInt(33) + 89));
+}
+
+Future<void> vibrateDevice() async {
+  if (await Vibration.hasVibrator() != null) {
+    await Vibration.vibrate(duration: 1000);
+  }
 }

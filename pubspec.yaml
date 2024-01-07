@@ -1,7 +1,7 @@
-name: sms_app
-description: "A new Flutter project."
-publish_to: 'none'
-version: 0.1.0
+name: 'ohrm_sms'
+description: "An Office of Human Resource Management SMS notifier application."
+publish_to: 'migfus.net'
+version: 0.0.1
 
 environment:
   sdk: '>=3.2.3 <4.0.0'

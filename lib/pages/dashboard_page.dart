@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:sms_app/pages/dashboard/pending_message_page.dart';
-import 'package:sms_app/pages/dashboard/sent_message_page.dart';
-import 'package:sms_app/pages/dashboard/settings_page.dart';
+import 'package:ohrm_sms/pages/dashboard/pending_message_page.dart';
+import 'package:ohrm_sms/pages/dashboard/sent_message_page.dart';
+import 'package:ohrm_sms/pages/dashboard/settings_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});

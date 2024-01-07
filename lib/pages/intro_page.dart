@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sms_app/pages/scan_page.dart';
+import 'package:ohrm_sms/pages/scan_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils.dart';
 

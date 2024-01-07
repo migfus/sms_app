@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sms_app/pages/dashboard_page.dart';
+import 'package:ohrm_sms/pages/dashboard_page.dart';
 
-import 'package:sms_app/pages/intro_page.dart';
-import 'package:sms_app/stores/intro_store.dart';
+import 'package:ohrm_sms/pages/intro_page.dart';
+import 'package:ohrm_sms/stores/intro_store.dart';
 
 
 void main() async {

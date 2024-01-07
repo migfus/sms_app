@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'package:sms_app/types/TextMessage.dart';
-import 'package:sms_app/utils.dart';
+import 'package:ohrm_sms/types/TextMessage.dart';
+import 'package:ohrm_sms/utils.dart';
 import 'dart:convert' as convert;
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -23,7 +23,7 @@ class _SentMessagePageState extends State<SentMessagePage> {
     final SharedPreferences prefs = await _prefs;
 
     var res = await http.get(
-      Uri.parse('${prefs.getString('url')}/api/text-message?type=sent&id=${prefs.getString('deviceToken')!.replaceAll('qr_', '')}'),
+      Uri.parse('${prefs.getString('url')}/api/text-message?type=sent&id=${prefs.getString('deviceToken')}'),
       headers: { 'Accept': 'application/json' },
     );
 
