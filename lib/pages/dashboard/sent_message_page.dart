@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ohrm_sms/pages/intro_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:ohrm_sms/types/TextMessage.dart';
@@ -34,6 +35,14 @@ class _SentMessagePageState extends State<SentMessagePage> {
       final List<TextMessage> messages = jsonData.map((data) => TextMessage.fromJson(data)).toList();
       coloredPrint(text: 'sent status past json to messages');
       return messages;
+    }
+    else if(res.statusCode == 401) {
+      if(await logOutDevice()) {
+        Navigator.pushReplacement(
+          context, 
+          MaterialPageRoute(builder: (context) => const IntroPage())
+        );
+      }
     }
     return [];
   }

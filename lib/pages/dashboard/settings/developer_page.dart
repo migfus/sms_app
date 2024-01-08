@@ -27,7 +27,7 @@ class DeveloperPage extends StatelessWidget {
             // NOTE Remove this Device
             const ListTile(
               leading: Icon(Icons.extension),
-              title: Text("Version 0.0.1 - Buggy AF"),
+              title: Text("Version 0.0.2 - Vulnerability Fix Update"),
             ),
 
             // NOTE Developer

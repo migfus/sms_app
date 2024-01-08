@@ -3,6 +3,7 @@ import 'package:background_sms/background_sms.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:math';
 import 'package:vibration/vibration.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 void coloredPrint({required String text, String color = 'white'}) {
@@ -89,4 +90,14 @@ Future<void> vibrateDevice() async {
   if (await Vibration.hasVibrator() != null) {
     await Vibration.vibrate(duration: 1000);
   }
+}
+
+Future<bool> logOutDevice() async {
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  final SharedPreferences prefs = await _prefs;
+
+  prefs.remove('deviceToken');
+  prefs.remove('url');
+
+  return true;
 }

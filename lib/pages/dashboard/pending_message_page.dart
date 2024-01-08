@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:ohrm_sms/pages/intro_page.dart';
 import 'dart:convert' as convert;
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -55,7 +56,14 @@ class PendingMessagePageState extends State<PendingMessagePage> {
           content: textMessages[0].content
         );
         return textMessages;
-
+      }
+    }
+    else if(res.statusCode == 401) {
+      if(await logOutDevice()) {
+        Navigator.pushReplacement(
+          context, 
+          MaterialPageRoute(builder: (context) => const IntroPage())
+        );
       }
     }
     return [];

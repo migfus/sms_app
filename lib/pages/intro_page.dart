@@ -42,7 +42,7 @@ class _IntroPageState extends State<IntroPage> {
       home: Scaffold(
         body: Center(
           child: Column(
-            children: [
+            children: <Widget> [
               const Padding(
                 padding: EdgeInsets.only(top: 40),
                 child: Text("Welcome to Buggy AF OHRM SMS"),
@@ -52,16 +52,9 @@ class _IntroPageState extends State<IntroPage> {
                 child: Text('Please enter the proper url target (ex: https://id.migfus.net)'),
               ),
 
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  initialValue: _url,
-                  decoration: const InputDecoration(labelText: 'URL'),
-                  validator: (value) {
-                    return null;
-                  },
-                  onSaved: (value) => _url = value ?? '',
-                ),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text('Test')
               ),
               
               

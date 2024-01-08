@@ -96,7 +96,7 @@ class _SettingsPageState extends State<SettingsPage> {
             // NOTE Developer
             ListTile(
               leading: const Icon(Icons.info),
-              title: const Text("About v0.0.1"),
+              title: const Text("About v0.0.2"),
               onTap: () {
                 Navigator.push(
                   context,

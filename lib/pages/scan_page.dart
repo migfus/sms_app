@@ -30,15 +30,15 @@ class _ScanPage extends State<ScanPage> {
       controller.pauseCamera();
 
       await vibrateDevice();
-      await setPrefsData(link: jsonList['link']);
+      await setPrefsData(link: jsonList['link'], id: jsonList['id']);
       await postAPI();
 
       setState((){
         result = scanData;
       });
 
-      Navigator.push(
-        context,
+      Navigator.pushReplacement(
+        context, 
         MaterialPageRoute(builder: (context) => const DashboardPage())
       );
     });
@@ -48,29 +48,33 @@ class _ScanPage extends State<ScanPage> {
 
   
 
-  Future<void> setPrefsData({required String link}) async {
+  Future<void> setPrefsData({required String link, required String id}) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString('url', link);
-    prefs.setString('deviceToken', '${generateID()}');
+    prefs.setString('deviceToken', id);
   }
 
   Future<void> postAPI() async{
     final SharedPreferences prefs = await _prefs;
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    final String deviceToken = prefs.getString('deviceToken') ?? '';
+    final String url = prefs.getString('url') ?? '';
+
     coloredPrint(text: 'postAPI will process');
-    coloredPrint(text: 'testing for ID: ${prefs.getString('deviceToken')}');
+    coloredPrint(text: 'testing for ID: $deviceToken');
     
-    var res = await http.post(
-      Uri.parse('${prefs.getString('url')}/api/device'),
+    var res =   await http.put(
+      Uri.parse('$url/api/device/$deviceToken'),
       headers: { 'Accept': 'application/json' },
       body: {
-        'id': prefs.getString('deviceToken'),
+        'id': deviceToken,
         'name': androidInfo.brand,
         'platform': 'Android'
       }
     );
 
     if(res.statusCode == 200) {
+      coloredPrint(text: res.body, color: 'success');
       coloredPrint(text: 'Device has been added', color: 'success');
     }
   }
