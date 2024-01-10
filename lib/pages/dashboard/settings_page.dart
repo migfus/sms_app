@@ -66,10 +66,13 @@ class _SettingsPageState extends State<SettingsPage> {
               title: const Text("Remove this device"),
               onTap: () async {
                 await _setDeviceToken();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const IntroPage())
-                );
+                if(mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const IntroPage())
+                  );
+                }
+                
               },
             ),
 

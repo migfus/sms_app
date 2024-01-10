@@ -1,9 +1,7 @@
-import './UserRegister.dart';
+import './user_register.dart';
 
 class TextMessage {
   final int id;
-  // final String devicId;
-  // final String userRegisterId;
   final String content;
   final String? readAt;
   final String createdAt;
@@ -12,13 +10,6 @@ class TextMessage {
   TextMessage({ required this.id, required this.content, required this.readAt, required this.createdAt, required this.userRegister});
 
   factory TextMessage.fromJson(var json) {
-    // return TextMessage(
-    //   id: json['id'], 
-    //   content: json['content'], 
-    //   readAt: json['read_at'], 
-    //   createdAt: json['created_at'], 
-    //   userRegister: UserRegister.fromJson(json['user_register'])
-    // );
     return TextMessage(
       id: json['id'], 
       content: json['content'] ?? '', 

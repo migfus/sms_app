@@ -37,16 +37,14 @@ class _ScanPage extends State<ScanPage> {
         result = scanData;
       });
 
-      Navigator.pushReplacement(
-        context, 
-        MaterialPageRoute(builder: (context) => const DashboardPage())
-      );
+      if(mounted) {
+        Navigator.pushReplacement(
+          context, 
+          MaterialPageRoute(builder: (context) => const DashboardPage())
+        );
+      }
     });
-    
-    
   }
-
-  
 
   Future<void> setPrefsData({required String link, required String id}) async {
     final prefs = await SharedPreferences.getInstance();

@@ -5,9 +5,8 @@ import 'dart:convert' as convert;
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 import 'package:ohrm_sms/components/app_bar_search_component.dart';
-import 'package:ohrm_sms/types/TextMessage.dart';
+import 'package:ohrm_sms/types/text_message.dart';
 import 'package:ohrm_sms/utils.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -60,10 +59,12 @@ class PendingMessagePageState extends State<PendingMessagePage> {
     }
     else if(res.statusCode == 401) {
       if(await logOutDevice()) {
-        Navigator.pushReplacement(
-          context, 
-          MaterialPageRoute(builder: (context) => const IntroPage())
-        );
+        if(mounted) {
+          Navigator.pushReplacement(
+            context, 
+            MaterialPageRoute(builder: (context) => const IntroPage())
+          );
+        }
       }
     }
     return [];

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ohrm_sms/pages/intro_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'package:ohrm_sms/types/TextMessage.dart';
+import 'package:ohrm_sms/types/text_message.dart';
 import 'package:ohrm_sms/utils.dart';
 import 'dart:convert' as convert;
 import 'package:timeago/timeago.dart' as timeago;
@@ -38,10 +38,12 @@ class _SentMessagePageState extends State<SentMessagePage> {
     }
     else if(res.statusCode == 401) {
       if(await logOutDevice()) {
-        Navigator.pushReplacement(
-          context, 
-          MaterialPageRoute(builder: (context) => const IntroPage())
+        if(mounted) {
+          Navigator.pushReplacement(
+            context, 
+            MaterialPageRoute(builder: (context) => const IntroPage())
         );
+        }
       }
     }
     return [];
